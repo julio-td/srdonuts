@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sr. Donuts – Encontre sua loja</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Boogaloo&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --pink:    #FF4F9A;
+      --pink-light: #FFB3D9;
+      --blue:    #2B7FFF;
+      --blue-dark: #1A5FD4;
+      --cream:   #FFF8F0;
+      --dark:    #1A0A2E;
+      --white:   #ffffff;
+      --shadow:  0 8px 40px rgba(255,79,154,0.25);
+    }
+
+    html, body {
+      height: 100%;
+      font-family: 'Nunito', sans-serif;
+      background: var(--cream);
+      overflow-x: hidden;
+    }
+
+    /* ── Confetti dots background ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        radial-gradient(circle, var(--pink-light) 2px, transparent 2px),
+        radial-gradient(circle, #B3D4FF 2px, transparent 2px),
+        radial-gradient(circle, #FFE5B3 2px, transparent 2px);
+      background-size: 60px 60px, 90px 90px, 75px 75px;
+      background-position: 0 0, 30px 30px, 15px 45px;
+      opacity: 0.4;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ══════════════════════════════
+       SPLASH SCREEN
+    ══════════════════════════════ */
+    #splash {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(135deg, #FF4F9A 0%, #FF85BE 50%, #2B7FFF 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      transition: opacity 0.5s ease;
+    }
+    #splash.hide {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .splash-logo {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      animation: splashPulse 0.6s ease-out;
+    }
+
+    @keyframes splashPulse {
+      0%   { transform: scale(0.6); opacity: 0; }
+      70%  { transform: scale(1.08); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .donut-icon {
+      font-size: 90px;
+      filter: drop-shadow(0 8px 20px rgba(0,0,0,0.3));
+      animation: spin 1.2s ease-out 0.2s both;
+    }
+    @keyframes spin {
+      0%   { transform: rotate(-180deg) scale(0); }
+      80%  { transform: rotate(10deg) scale(1.05); }
+      100% { transform: rotate(0deg) scale(1); }
+    }
+
+    .splash-title {
+      font-family: 'Boogaloo', cursive;
+      font-size: 52px;
+      color: white;
+      letter-spacing: 2px;
+      text-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    .splash-sub {
+      font-size: 13px;
+      color: rgba(255,255,255,0.85);
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    /* ══════════════════════════════
+       MAIN PAGE
+    ══════════════════════════════ */
+    #main {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      z-index: 1;
+      opacity: 0;
+      transition: opacity 0.6s ease;
+    }
+    #main.visible { opacity: 1; }
+
+    /* ── Header (logo pequena no topo) ── */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 20px 24px;
+      background: white;
+      box-shadow: 0 2px 20px rgba(255,79,154,0.12);
+    }
+    header .h-donut { font-size: 32px; }
+    header .h-title {
+      font-family: 'Boogaloo', cursive;
+      font-size: 28px;
+      color: var(--pink);
+      letter-spacing: 1px;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      text-align: center;
+    }
+
+    .hero-badge {
+      background: linear-gradient(135deg, var(--pink), var(--blue));
+      color: white;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      padding: 6px 18px;
+      border-radius: 99px;
+      margin-bottom: 20px;
+    }
+
+    .hero h1 {
+      font-family: 'Boogaloo', cursive;
+      font-size: clamp(28px, 6vw, 48px);
+      color: var(--dark);
+      line-height: 1.2;
+      margin-bottom: 10px;
+    }
+    .hero h1 span { color: var(--pink); }
+
+    .hero p {
+      color: #666;
+      font-size: 15px;
+      max-width: 360px;
+      line-height: 1.6;
+      margin-bottom: 36px;
+    }
+
+    /* ── CEP Card ── */
+    .cep-card {
+      background: white;
+      border-radius: 24px;
+      padding: 32px 28px;
+      box-shadow: var(--shadow);
+      width: 100%;
+      max-width: 420px;
+      border: 2px solid var(--pink-light);
+    }
+
+    .cep-label {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--dark);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 12px;
+    }
+
+    .cep-input-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .cep-input {
+      flex: 1;
+      border: 2px solid #eee;
+      border-radius: 14px;
+      padding: 14px 18px;
+      font-size: 18px;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 700;
+      color: var(--dark);
+      letter-spacing: 2px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .cep-input:focus { border-color: var(--pink); }
+    .cep-input::placeholder { color: #ccc; font-weight: 400; letter-spacing: 1px; }
+
+    .cep-btn {
+      background: linear-gradient(135deg, var(--pink), #FF85BE);
+      color: white;
+      border: none;
+      border-radius: 14px;
+      padding: 14px 20px;
+      font-size: 20px;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+      box-shadow: 0 4px 15px rgba(255,79,154,0.4);
+    }
+    .cep-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255,79,154,0.5); }
+    .cep-btn:active { transform: translateY(0); }
+
+    /* ── Result ── */
+    #result {
+      margin-top: 20px;
+      display: none;
+    }
+    #result.show { display: block; }
+
+    .result-card {
+      border-radius: 20px;
+      padding: 20px;
+      text-align: center;
+      animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    @keyframes popIn {
+      0%   { transform: scale(0.8); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .result-card.nearest {
+      background: linear-gradient(135deg, #f0fff8, #d4f7e8);
+      border: 2px solid #5DE09A;
+    }
+    .result-card .r-emoji { font-size: 42px; margin-bottom: 8px; }
+    .result-card .r-label {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #2E9E6B;
+      margin-bottom: 4px;
+    }
+    .result-card .r-store {
+      font-family: 'Boogaloo', cursive;
+      font-size: 26px;
+      color: var(--dark);
+      margin-bottom: 4px;
+    }
+    .result-card .r-addr {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 16px;
+    }
+    .result-card .r-dist {
+      display: inline-block;
+      background: white;
+      border-radius: 99px;
+      padding: 4px 14px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #2E9E6B;
+      margin-bottom: 16px;
+    }
+
+    .go-btn {
+      display: block;
+      width: 100%;
+      background: linear-gradient(135deg, var(--blue), var(--blue-dark));
+      color: white;
+      border: none;
+      border-radius: 14px;
+      padding: 15px;
+      font-size: 16px;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 800;
+      cursor: pointer;
+      text-decoration: none;
+      transition: transform 0.15s, box-shadow 0.15s;
+      box-shadow: 0 4px 15px rgba(43,127,255,0.4);
+    }
+    .go-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(43,127,255,0.5); }
+
+    /* ── Error ── */
+    .error-msg {
+      background: #FFF0F0;
+      border: 2px solid #FFB3B3;
+      border-radius: 14px;
+      padding: 14px 18px;
+      color: #CC4444;
+      font-size: 14px;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    /* ── Both stores below ── */
+    .stores-row {
+      display: flex;
+      gap: 12px;
+      margin-top: 36px;
+      width: 100%;
+      max-width: 420px;
+      flex-wrap: wrap;
+    }
+    .store-pill {
+      flex: 1;
+      min-width: 160px;
+      background: white;
+      border-radius: 18px;
+      padding: 16px;
+      border: 2px solid #f0f0f0;
+      text-align: center;
+      cursor: pointer;
+      text-decoration: none;
+      transition: border-color 0.2s, transform 0.15s;
+    }
+    .store-pill:hover { border-color: var(--pink); transform: translateY(-2px); }
+    .store-pill .sp-icon { font-size: 28px; }
+    .store-pill .sp-name { font-family: 'Boogaloo', cursive; font-size: 17px; color: var(--dark); margin: 4px 0 2px; }
+    .store-pill .sp-addr { font-size: 11px; color: #999; line-height: 1.4; }
+
+    .stores-title {
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #bbb;
+      margin-top: 32px;
+      margin-bottom: 8px;
+    }
+
+    /* ── Loading ── */
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      color: var(--pink);
+      font-weight: 700;
+      font-size: 14px;
+      padding: 16px;
+    }
+    .spinner {
+      width: 20px; height: 20px;
+      border: 3px solid var(--pink-light);
+      border-top-color: var(--pink);
+      border-radius: 50%;
+      animation: rotate 0.7s linear infinite;
+    }
+    @keyframes rotate { to { transform: rotate(360deg); } }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 12px;
+      color: #ccc;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- SPLASH -->
+  <div id="splash">
+    <div class="splash-logo">
+      <div class="donut-icon">🍩</div>
+      <div class="splash-title">Sr. Donuts</div>
+      <div class="splash-sub">Fresquinhos pra você</div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div id="main">
+    <header>
+      <span class="h-donut">🍩</span>
+      <span class="h-title">Sr. Donuts</span>
+    </header>
+
+    <div class="hero">
+      <div class="hero-badge">🛵 Delivery</div>
+      <h1>Qual loja fica<br/><span>mais pertinho</span><br/>de você?</h1>
+      <p>Digite seu CEP e a gente encontra a loja mais próxima pra você receber seu pedido mais rápido 🍩</p>
+
+      <div class="cep-card">
+        <div class="cep-label">📍 Seu CEP</div>
+        <div class="cep-input-row">
+          <input
+            id="cepInput"
+            class="cep-input"
+            type="text"
+            inputmode="numeric"
+            maxlength="9"
+            placeholder="00000-000"
+            autocomplete="postal-code"
+          />
+          <button class="cep-btn" onclick="buscarCEP()">→</button>
+        </div>
+        <div id="result"></div>
+      </div>
+
+      <p class="stores-title">ou escolha diretamente</p>
+
+      <div class="stores-row">
+        <a class="store-pill" href="LINK_LOJA_CENTRO" target="_blank">
+          <div class="sp-icon">🏙️</div>
+          <div class="sp-name">Centro</div>
+          <div class="sp-addr">Santana de Parnaíba – Centro</div>
+        </a>
+        <a class="store-pill" href="LINK_LOJA_ALPHAVILLE" target="_blank">
+          <div class="sp-icon">🏘️</div>
+          <div class="sp-name">Alphaville</div>
+          <div class="sp-addr">Santana de Parnaíba – Alphaville</div>
+        </a>
+      </div>
+    </div>
+
+    <footer>© 2025 Sr. Donuts · Feitos com amor 🍩</footer>
+  </div>
+
+<script>
+  // ── Animação splash → main ──────────────────────────────
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      document.getElementById('splash').classList.add('hide');
+      setTimeout(() => {
+        document.getElementById('splash').style.display = 'none';
+        document.getElementById('main').classList.add('visible');
+      }, 500);
+    }, 1800);
+  });
+
+  // ── Formatar CEP ────────────────────────────────────────
+  document.getElementById('cepInput').addEventListener('input', function () {
+    let v = this.value.replace(/\D/g, '').slice(0, 8);
+    if (v.length > 5) v = v.slice(0,5) + '-' + v.slice(5);
+    this.value = v;
+    if (v.replace('-','').length === 8) buscarCEP();
+  });
+
+  document.getElementById('cepInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') buscarCEP();
+  });
+
+  // ── Lojas ───────────────────────────────────────────────
+  const LOJAS = [
+    {
+      nome: 'Sr. Donuts Centro',
+      apelido: 'Centro',
+      endereco: 'Santana de Parnaíba – Centro',
+      icone: '🏙️',
+      lat: -23.4435,
+      lng: -46.9027,
+      link: 'LINK_LOJA_CENTRO'   // ← Substituir pelo link real
+    },
+    {
+      nome: 'Sr. Donuts Alphaville',
+      apelido: 'Alphaville',
+      endereco: 'Santana de Parnaíba – Alphaville',
+      icone: '🏘️',
+      lat: -23.4773,
+      lng: -46.8544,
+      link: 'LINK_LOJA_ALPHAVILLE' // ← Substituir pelo link real
+    }
+  ];
+
+  // ── Haversine (distância em km sem API) ─────────────────
+  function haversine(lat1, lng1, lat2, lng2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLng = (lng2 - lng1) * Math.PI / 180;
+    const a = Math.sin(dLat/2)**2 +
+              Math.cos(lat1 * Math.PI/180) * Math.cos(lat2 * Math.PI/180) *
+              Math.sin(dLng/2)**2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  }
+
+  // ── Buscar CEP ──────────────────────────────────────────
+  async function buscarCEP() {
+    const cep = document.getElementById('cepInput').value.replace(/\D/g,'');
+    if (cep.length !== 8) return;
+
+    const resultDiv = document.getElementById('result');
+    resultDiv.className = 'show';
+    resultDiv.innerHTML = `<div class="loading"><div class="spinner"></div> Localizando...</div>`;
+
+    try {
+      const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+      const data = await res.json();
+
+      if (data.erro) {
+        resultDiv.innerHTML = `<div class="error-msg">😕 CEP não encontrado. Tente novamente!</div>`;
+        return;
+      }
+
+      // Buscar coordenadas via Nominatim (OpenStreetMap — gratuito)
+      const query = encodeURIComponent(`${data.logradouro}, ${data.localidade}, ${data.uf}, Brasil`);
+      const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?q=${query}&format=json&limit=1`, {
+        headers: { 'Accept-Language': 'pt-BR' }
+      });
+      const geoData = await geoRes.json();
+
+      let clientLat, clientLng;
+      if (geoData.length > 0) {
+        clientLat = parseFloat(geoData[0].lat);
+        clientLng = parseFloat(geoData[0].lon);
+      } else {
+        // Fallback: usar coordenadas do centro de Santana de Parnaíba
+        resultDiv.innerHTML = `<div class="error-msg">😕 Não consegui localizar seu endereço. Use os botões abaixo para escolher a loja!</div>`;
+        return;
+      }
+
+      // Calcular distância para cada loja
+      const lojasComDist = LOJAS.map(l => ({
+        ...l,
+        dist: haversine(clientLat, clientLng, l.lat, l.lng)
+      }));
+      lojasComDist.sort((a, b) => a.dist - b.dist);
+      const nearest = lojasComDist[0];
+
+      resultDiv.innerHTML = `
+        <div class="result-card nearest">
+          <div class="r-emoji">${nearest.icone}</div>
+          <div class="r-label">✅ Loja mais próxima de você</div>
+          <div class="r-store">${nearest.nome}</div>
+          <div class="r-addr">${nearest.endereco}</div>
+          <div class="r-dist">📏 ${nearest.dist.toFixed(1)} km de distância</div>
+          <a class="go-btn" href="${nearest.link}" target="_blank">
+            🍩 Pedir agora nessa loja →
+          </a>
+        </div>
+      `;
+
+    } catch (err) {
+      resultDiv.innerHTML = `<div class="error-msg">😕 Erro ao buscar. Verifique sua conexão e tente novamente.</div>`;
+    }
+  }
+</script>
+</body>
+</html>
